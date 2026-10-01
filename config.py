@@ -19,7 +19,7 @@ def _bool(name: str, default: bool) -> bool:
 class Settings:
     """Immutable runtime configuration."""
 
-    symbols: tuple[str, ...] = tuple(filter(None, os.getenv("SYMBOLS", "AAPL,NVDA,TSLA").split(",")))
+    symbols: tuple[str, ...] = tuple(filter(None, os.getenv("SYMBOLS", "XAUUSD").split(",")))
     timeframe: str = os.getenv("TIMEFRAME", "M15").upper()
     candle_count: int = int(os.getenv("CANDLE_COUNT", "500"))
     risk_per_trade: float = float(os.getenv("RISK_PER_TRADE", "0.01"))
@@ -30,18 +30,22 @@ class Settings:
     max_trades_per_day: int = int(os.getenv("MAX_TRADES_PER_DAY", "5"))
     max_daily_loss: float = float(os.getenv("MAX_DAILY_LOSS", "0.03"))
     max_positions: int = int(os.getenv("MAX_SIMULTANEOUS_POSITIONS", "3"))
+    max_positions_per_symbol: int = int(os.getenv("MAX_POSITIONS_PER_SYMBOL", "1"))
+    trade_cooldown_minutes: int = int(os.getenv("TRADE_COOLDOWN_MINUTES", "15"))
+    allow_hedging: bool = _bool("ALLOW_HEDGING", False)
     max_spread_points: float = float(os.getenv("MAX_SPREAD_POINTS", "50"))
     use_news: bool = _bool("USE_NEWS", True)
     use_finbert: bool = _bool("USE_FINBERT", True)
     demo_mode: bool = _bool("DEMO_MODE", True)
     live_trading: bool = _bool("LIVE_TRADING", False)
+    auto_trade: bool = _bool("AUTO_TRADE", False)
     mt5_login: int | None = int(os.environ["MT5_LOGIN"]) if os.getenv("MT5_LOGIN") else None
     mt5_password: str | None = os.getenv("MT5_PASSWORD")
     mt5_server: str | None = os.getenv("MT5_SERVER")
     alpha_vantage_key: str | None = os.getenv("ALPHA_VANTAGE_API_KEY")
     database_path: Path = Path(os.getenv("DATABASE_PATH", str(BASE_DIR / "trading_bot.db")))
     log_path: Path = Path(os.getenv("LOG_PATH", str(BASE_DIR / "bot.log")))
-    magic_number: int = int(os.getenv("MAGIC_NUMBER", "260101"))
+    magic_number: int = int(os.getenv("MAGIC_NUMBER", "2601001"))
     deviation: int = int(os.getenv("DEVIATION", "20"))
     signal_weights: dict[str, float] = field(default_factory=lambda: {
         "trend": .15, "levels": .20, "indicators": .15, "volume": .10,
@@ -53,6 +57,8 @@ class Settings:
             raise ValueError("Risk settings must satisfy 0 < risk <= max risk <= 10%")
         if self.live_trading and self.demo_mode:
             raise ValueError("LIVE_TRADING and DEMO_MODE cannot both be enabled")
+        if min(self.max_positions, self.max_positions_per_symbol, self.max_trades_per_day) < 1 or self.trade_cooldown_minutes < 0:
+            raise ValueError("Position/trade limits must be positive and cooldown cannot be negative")
         if abs(sum(self.signal_weights.values()) - 1) > 1e-9:
             raise ValueError("Signal weights must total 1.0")
 
@@ -65,3 +71,4 @@ RISK_PER_TRADE, MIN_CONFIDENCE, MIN_RR = settings.risk_per_trade, settings.min_c
 ATR_MULTIPLIER, MAX_TRADES_PER_DAY = settings.atr_multiplier, settings.max_trades_per_day
 MAX_DAILY_LOSS, USE_NEWS, USE_FINBERT = settings.max_daily_loss, settings.use_news, settings.use_finbert
 DEMO_MODE, LIVE_TRADING = settings.demo_mode, settings.live_trading
+AUTO_TRADE = settings.auto_trade

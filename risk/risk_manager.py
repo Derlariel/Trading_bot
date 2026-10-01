@@ -37,9 +37,9 @@ class RiskDecision:
 
 def validate_trade(state: TradeState, confidence: float, risk_reward: float, spread_points: float, market_open: bool, news_risk: float = 0) -> RiskDecision:
     reasons = check_trade_limits(state)
-    if confidence < settings.min_confidence: reasons.append("signal confidence below minimum")
-    if risk_reward < settings.min_rr: reasons.append("risk/reward below minimum")
-    if spread_points > settings.max_spread_points: reasons.append("spread too high")
-    if not market_open: reasons.append("market closed")
-    if news_risk >= .8: reasons.append("high-impact news risk")
+    if confidence < settings.min_confidence: reasons.append("CONFIDENCE_TOO_LOW")
+    if risk_reward < settings.min_rr: reasons.append("RISK_REWARD_TOO_LOW")
+    if spread_points > settings.max_spread_points: reasons.append("SPREAD_TOO_HIGH")
+    if not market_open: reasons.append("MARKET_CLOSED")
+    if news_risk >= .8: reasons.append("HIGH_IMPACT_NEWS_RISK")
     return RiskDecision(not reasons, tuple(reasons))

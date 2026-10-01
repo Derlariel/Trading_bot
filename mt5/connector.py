@@ -52,6 +52,9 @@ class MT5Connector:
     def account_info(self) -> dict[str, Any]:
         return _dict(native_mt5.account_info()) if self.is_connected() else {}
 
+    def terminal_info(self) -> dict[str, Any]:
+        return _dict(native_mt5.terminal_info()) if self.is_connected() else {}
+
     def account_summary(self) -> dict[str, float]:
         info = self.account_info()
         summary = {key: float(info.get(key, 0)) for key in ("balance", "equity", "margin", "margin_free")}

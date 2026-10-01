@@ -77,8 +77,21 @@ Live order เกิดได้เฉพาะเมื่อตั้ง `DEMO
 วิเคราะห์ symbol จาก MT5 และบันทึก signal/news ลง SQLite:
 
 ```bash
-python main.py --symbol NVDA
+python main.py --symbol XAUUSD
 ```
+
+### Show signals on the MT5 chart
+
+1. Copy `mql5/TradingBotOverlay.mq5` to the terminal Data Folder under `MQL5/Indicators/`, compile it in MetaEditor, and attach it to the matching symbol chart.
+2. Keep the analyzer running using the broker's exact symbol name, including any suffix:
+
+```bash
+python main.py --symbol XAUUSD --watch 60
+```
+
+The indicator reads `Common/Files/TradingBot/signal.csv` and draws the current entry zone, SL, TP1-TP3, nearest support/resistance, and BUY/SELL arrow. It does not place orders.
+
+Automatic execution is off by default. `AUTO_TRADE=true` enables risk-based sizing from account balance, SL distance, and broker volume rules. With `DEMO_MODE=true` and `LIVE_TRADING=false`, orders are sent only when MT5 confirms the connected account is a Demo account. Keep `AUTO_TRADE=false` for manual trading. Account leverage is set by the broker, not per order.
 
 Dashboard:
 
