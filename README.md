@@ -74,6 +74,17 @@ Live order เกิดได้เฉพาะเมื่อตั้ง `DEMO
 
 ## Run
 
+### Native MT5 Expert Advisor (Demo only)
+
+`mql5/AurumXAU_EA.mq5` คือ EA ที่วิเคราะห์และส่งคำสั่งจากใน MT5 โดยตรง จึงไม่ต้องเปิด Python หรือ Dashboard ขณะทำงาน ค่าเริ่มต้นเป็น `MANUAL`, risk-based volume `0.5%` และรับเฉพาะบัญชี Demo/Strategy Tester
+
+1. คัดลอกไฟล์ `.mq5` และ `.ex5` ไป `MQL5/Experts/Aurum/` ใน MT5 Data Folder
+2. ใน Navigator กด Refresh แล้วลาก `AurumXAU_EA` ลงกราฟ XAUUSD
+3. เปิด Algo Trading จากนั้นกด `AUTO DEMO` บนกราฟเมื่อต้องการให้ EA เปิดออเดอร์เอง
+4. กด `MANUAL` เพื่อวิเคราะห์ต่อแต่ไม่เปิดออเดอร์ใหม่ หรือ `PAUSE` เพื่อพักทั้งการวิเคราะห์และการเข้าออเดอร์
+
+เลือก `LOT_FIXED` สำหรับ lot คงที่ 0.01 หรือ `LOT_RISK_PERCENT` เพื่อคำนวณจาก Balance และระยะ SL (default 0.5%, hard cap 1%) ค่า leverage เป็นคุณสมบัติของบัญชีที่ broker กำหนด ไม่ได้ตั้งต่อออเดอร์ EA v2 ใช้ H1 trend + M15 structure/SR, EMA, ADX, RSI context, candle confirmation และ volatility filter พร้อม daily/consecutive-loss guard, cooldown, margin check และ break-even
+
 วิเคราะห์ symbol จาก MT5 และบันทึก signal/news ลง SQLite:
 
 ```bash
@@ -108,6 +119,12 @@ python main.py --symbol NVDA --backtest data/NVDA_M15.csv
 ```
 
 Backtest V1 เปิดครั้งละหนึ่ง position และถ้า SL/TP ถูกแตะใน candle เดียวกันจะนับ SL ก่อนแบบ conservative รายงาน total return, win/loss rate, profit factor, Sharpe, max drawdown, average win/loss, RR, trades และ expectancy
+
+### MT5 A/B backtest
+
+ไฟล์ `backtest/mt5_baseline.ini` และ `backtest/mt5_no_break_even.ini` ใช้ XAUUSD M15, real ticks และช่วงเวลาเดียวกัน โดยต่างกันเฉพาะ `UseBreakEven` คัดลอกไฟล์ `.set` ที่เกี่ยวข้องไป `MQL5/Profiles/Tester/` แล้วเปิด MT5 ด้วย `/config:<ไฟล์.ini>` ผลรอบล่าสุดอยู่ที่ `backtest/reports/comparison.csv`
+
+Preset ทุนขนาดเล็กอยู่ที่ `backtest/mt5_budget_10.ini`, `mt5_budget_50.ini` และ `mt5_budget_100.ini` ทั้งหมดคง risk guard เดิมไว้ ดังนั้น XAUUSD มาตรฐานอาจไม่มีออเดอร์ เปลี่ยน `Symbol` เมื่อเชื่อมบัญชี cent/nano ของ broker จริงแล้วเท่านั้น
 
 ## Tests
 
